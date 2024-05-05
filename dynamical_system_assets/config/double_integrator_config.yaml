@@ -1,0 +1,37 @@
+model:
+    name: double_integrator
+    params:
+      mass: &mass 1.
+      damping: &damping 0.0
+
+ocp:
+  parameter_values: [*mass, *damping]
+  constraints:
+    x0: [10.0, 0.0]
+    idxbu: [0]
+    lbu: [ -80.0 ] # lower bound of control input
+    ubu: [ 80.0 ] # upper bound of control input
+  cost:
+    cost_type: LINEAR_LS
+    cost_type_e: LINEAR_LS
+    x_ref: [0., 0.]
+    u_ref: [0.]
+    Q_diag: [100., 10.]
+    R_diag: [1.]
+  solver_options:
+    tf: 1.
+    N: 100
+    qp_solver: PARTIAL_CONDENSING_HPIPM
+    hessian_approx: GAUSS_NEWTON
+    integrator_type: ERK
+    sim_method_num_stages: 4
+    nlp_solver_type: SQP
+    nlp_solver_max_iter: 500
+    qp_solver_iter_max: 200
+    with_solution_sens_wrt_params: False
+    with_value_sens_wrt_params: False
+
+sim:
+  parameter_values: [*mass, *damping]
+  solver_options:
+    T: 0.01

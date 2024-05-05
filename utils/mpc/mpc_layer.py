@@ -51,7 +51,7 @@ def _AcadosOcpLayerFunction(acados_ocp_solver: AcadosOcpSolver):
 			u0 = torch.Tensor(batch_size, ctx.nu)
 			for batch in range(batch_size):
 				for stage in range(acados_ocp_solver.acados_ocp.dims.N):
-					acados_ocp_solver.set(stage, 'p', params[batch, :].cpu().numpy())  # might need to transform params to numpy array
+					acados_ocp_solver.set(stage, 'p', params[batch, :].cpu().numpy())
 				u_opt = acados_ocp_solver.solve_for_x0(x0[batch, :].cpu().numpy(), fail_on_nonzero_status=False, print_stats_on_failure=False)
 				u0[batch, :] = torch.tensor(u_opt)
 				if acados_ocp_solver.get_status() not in [0, 2]:
