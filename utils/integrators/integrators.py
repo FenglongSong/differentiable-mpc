@@ -12,6 +12,7 @@ def explicit_euler(f, x, u, dt):
 	:param dt: time step
 	:return: next states
 	"""
+	assert callable(f)
 	return x + dt * f(x, u, dt)
 
 
@@ -24,6 +25,7 @@ def runge_kutta_4(f, x, u, dt):
 	:param dt: time step
 	:return: next states
 	"""
+	assert callable(f)
 	k1 = f(x, u)
 	k2 = f(x + dt / 2 * k1, u)
 	k3 = f(x + dt / 2 * k2, u)
