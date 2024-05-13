@@ -102,6 +102,6 @@ def _AcadosOcpLayerFunction(acados_ocp_solver: AcadosOcpSolver):
 					_, dudp = acados_ocp_solver.eval_solution_sensitivity(0, "params_global")
 					grad_u0_p[batch, :] = grad_output[batch] @ torch.tensor(dudp, dtype=grad_output.dtype)
 
-			return None, grad_u0_p
+			return grad_u0_x0, grad_u0_p
 	
 	return _AcadosOcpLayer.apply
