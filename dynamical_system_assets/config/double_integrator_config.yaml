@@ -9,8 +9,8 @@ ocp:
   constraints:
     x0: [10.0, 0.0]
     idxbu: [0]
-    lbu: [-80.0] # lower bound of control input
-    ubu: [80.0] # upper bound of control input
+    lbu: [-50.0] # lower bound of control input
+    ubu: [50.0] # upper bound of control input
   cost:
     cost_type: LINEAR_LS
     cost_type_e: LINEAR_LS
