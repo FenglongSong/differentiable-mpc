@@ -9,9 +9,13 @@ from utils.mpc.mpc_solver import BaseMpcSolver
 
 
 class MpcPolicy(BasePolicy, ABC):
-    """Model predictive control as an expert.
+    """The MPC policy object.
 
-    See `BaseAlgorithm` for more attributes.
+    Parameters are mostly the same as `BasePolicy`; additions are documented below.
+
+    :param args: positional arguments passed through to `BasePolicy`.
+    :param kwargs: keyword arguments passed through to `BasePolicy`.
+    :param mpc_solver: A mpc solver which solves an optimal control problem to get action.
     """
     mpc_solver: BaseMpcSolver
 
@@ -29,13 +33,13 @@ class MpcPolicy(BasePolicy, ABC):
         observation: PyTorchObs, deterministic: bool = False
     ) -> th.Tensor:
         """
-        Get the policy action from an observation (and optional hidden state).
-        Includes sugar-coating to handle different observations (e.g. normalizing images).
+        Get the action according to the policy for a given observation.
 
-        :param observation: the input observation
-        :param deterministic: Whether or not to return deterministic actions.
-        :return: the model's action and the next hidden state
-            (used in recurrent policies)
+        The action is computed by calling the MPC solver to solve the underlying MPC problem.
+
+        :param observation:
+        :param deterministic: Whether to use stochastic or deterministic actions
+        :return: Taken action according to the policy
         """
         # We do not deal with recurrent states here, so only observation is useful now
         if not deterministic:

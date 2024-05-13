@@ -13,6 +13,8 @@ class BaseMpcSolver(ABC):
         self.nx = None
         self.nu = None
         self.np = None
+        self.horizon = None
+        self.status = -1
         pass
 
     @abstractmethod
@@ -22,6 +24,22 @@ class BaseMpcSolver(ABC):
         :param x0: given initial states
         :return: the optimal input at current time step, optimal cost, solver works successfully or not.
         """
+        pass
+
+    @abstractmethod
+    def set_parameters(self, params: np.ndarray) -> None:
+        pass
+
+    @abstractmethod
+    def get_value_gradient(self) -> np.ndarray:
+        pass
+
+    @abstractmethod
+    def get_policy_gradient(self) -> np.ndarray:
+        pass
+
+    @abstractmethod
+    def get_value_function(self) -> float:
         pass
 
 
@@ -35,6 +53,7 @@ class AcadosMpcSolver(BaseMpcSolver):
         self.nx = acados_ocp_solver.acados_ocp.dims.nx
         self.nu = acados_ocp_solver.acados_ocp.dims.nu
         self.np = acados_ocp_solver.acados_ocp.dims.np
+        self.horizon = acados_ocp_solver.acados_ocp.dims.N
 
     def solve(self, x0: np.ndarray) -> Tuple[np.ndarray, float, bool]:
         opt_action = self.acados_ocp_solver.solve_for_x0(x0)
@@ -46,3 +65,18 @@ class AcadosMpcSolver(BaseMpcSolver):
             success = False
         return opt_action, opt_cost, success
 
+    def set_parameters(self, params: np.ndarray) -> None:
+        # We only consider setting same parameters for all stages for now.
+        for stage in range(self.horizon):
+            self.acados_ocp_solver.set(stage, 'p', params)
+
+    def get_policy_gradient(self) -> np.ndarray:
+        sens_x_p, sens_u_p = self.acados_ocp_solver.eval_solution_sensitivity(0, "params_global")
+        return sens_u_p
+
+    def get_value_gradient(self) -> np.ndarray:
+        sens_cost_p = self.acados_ocp_solver.eval_and_get_optimal_value_gradient("params_global")
+        return sens_cost_p
+
+    def get_value_function(self) -> float:
+        return self.acados_ocp_solver.get_cost()
