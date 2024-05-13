@@ -89,10 +89,9 @@ def _AcadosOcpLayerFunction(acados_ocp_solver: AcadosOcpSolver):
 			# The output of backward() function must be the same dimension as input arguments of forward
 			# Refer to: https://discuss.pytorch.org/t/a-question-about-autograd-function/201364
 			batch_size = ctx.batch_size
-			grad_u0_x0 = grad_u0_p = None
+			grad_u0_x0, grad_u0_p = None, None
 
 			if ctx.needs_input_grad[0]:
-				# raise Warning("SHIT")
 				grad_u0_x0 = torch.Tensor(batch_size, ctx.nx).type(grad_output.dtype)
 				for batch in range(batch_size):
 					_, dudx0 = acados_ocp_solver.eval_solution_sensitivity(0, "initial_state")
