@@ -120,7 +120,7 @@ class ActorCriticMpcLayerPolicy(ActorCriticPolicy):
 		for hidden_layer in self.hidden_layers:
 			x = self.activation(hidden_layer(x))
 		# mpc_params = F.relu(self.mpc_param_layer(x)) + 1e-2
-		mpc_params = F.relu(self.mpc_param_layer(x)).detach() + 1e-2
+		mpc_params = F.relu(self.mpc_param_layer(x)) + 1e-2
 		action = self.mpc_solver_layer(observation, mpc_params)
 		return action
 
