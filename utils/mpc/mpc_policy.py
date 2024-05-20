@@ -21,8 +21,8 @@ class MpcPolicy(BasePolicy, ABC):
 
     def __init__(
             self,
-            *args,
             mpc_solver: BaseMpcSolver,
+            *args,
             **kwargs,
     ):
         super().__init__(*args, **kwargs)
@@ -44,33 +44,62 @@ class MpcPolicy(BasePolicy, ABC):
         # We do not deal with recurrent states here, so only observation is useful now
         if not deterministic:
             RuntimeWarning("MPC policy can only return deterministic actions.")
-        action, _, success = self.mpc_solver.solve(observation.cpu().numpy().reshape(-1,))
+        state = self._state_estimation(observation)
+        action, _, success = self.mpc_solver.solve(state.cpu().numpy().reshape(-1,))
         if not success:
             raise RuntimeError("MPC Expert encounters a solver failure.")
         return th.tensor(action, dtype=th.float32)
+    
+    def _state_estimation(self, observation: PyTorchObs):
+        """
+        Estimate states from observation. Can be cusomized.
+        """
+        return observation
 
 
-class ActorCriticMpcPolicy(MpcPolicy, ActorCriticPolicy):
+
+class ActorCriticMpcPolicy(ActorCriticPolicy):
     """
     MPC as an Actor-Critic policy.
     """
     def __init__(
         self,
-        *args,
         mpc_solver: BaseMpcSolver,
         observation_space: spaces.Space,
         action_space: spaces.Space,
         lr_schedule: Schedule,
+        *args,
         **kwargs
     ):
         super().__init__(
-            *args,
             mpc_solver=mpc_solver,
             observation_space=observation_space,
             action_space=action_space,
             lr_schedule=lr_schedule,
+            *args,
             **kwargs
         )
+
+    def _predict(
+        self,
+        observation: PyTorchObs, deterministic: bool = False
+    ) -> th.Tensor:
+        """
+        Get the action according to the policy for a given observation.
+
+        The action is computed by calling the MPC solver to solve the underlying MPC problem.
+
+        :param observation:
+        :param deterministic: Whether to use stochastic or deterministic actions
+        :return: Taken action according to the policy
+        """
+        # We do not deal with recurrent states here, so only observation is useful now
+        if not deterministic:
+            RuntimeWarning("MPC policy can only return deterministic actions.")
+        action, _, success = self.mpc_solver.solve(observation.cpu().numpy().reshape(-1,))
+        if not success:
+            raise RuntimeError("MPC Expert encounters a solver failure.")
+        return th.tensor(action, dtype=th.float32)
 
     def evaluate_actions(self, obs: PyTorchObs, actions: th.Tensor) -> Tuple[th.Tensor, th.Tensor, Optional[th.Tensor]]:
         """

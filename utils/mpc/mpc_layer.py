@@ -1,3 +1,4 @@
+import numpy as np
 from acados_template import AcadosOcpSolver
 from torch import nn
 import torch
@@ -68,11 +69,23 @@ def _AcadosOcpLayerFunction(acados_ocp_solver: AcadosOcpSolver):
 			for batch in range(batch_size):
 				for stage in range(acados_ocp_solver.acados_ocp.dims.N):
 					acados_ocp_solver.set(stage, 'p', params[batch, :].cpu().numpy())
-				u_opt = acados_ocp_solver.solve_for_x0(x0[batch, :].cpu().numpy())
-				# u0[batch, :] = torch.tensor(u_opt, dtype=torch.double)
-				u0[batch, :] = torch.tensor(u_opt)
+
+				# RESET initial guesses (discard warm start)
+				for stage in range(acados_ocp_solver.acados_ocp.dims.N):
+					acados_ocp_solver.set(stage, 'x', np.zeros(acados_ocp_solver.acados_ocp.model.x.shape[0]))
+					acados_ocp_solver.set(stage, 'u', np.zeros(acados_ocp_solver.acados_ocp.model.u.shape[0]))
+				acados_ocp_solver.set(acados_ocp_solver.acados_ocp.dims.N, 'x', np.zeros(acados_ocp_solver.acados_ocp.model.x.shape[0]))
+
+				u_opt = acados_ocp_solver.solve_for_x0(x0[batch, :].cpu().numpy(), fail_on_nonzero_status=False)
 				if acados_ocp_solver.get_status() not in [0, 2]:
-					breakpoint()
+					pdb.set_trace()
+				# if acados_ocp_solver.get_status() not in [0, 2]:
+				# 	for stage in range(acados_ocp_solver.acados_ocp.dims.N):
+				# 		acados_ocp_solver.set(stage, 'x', np.zeros(acados_ocp_solver.acados_ocp.model.x.shape[0]))
+				# 		acados_ocp_solver.set(stage, 'u', np.zeros(acados_ocp_solver.acados_ocp.model.u.shape[0]))
+				# 	u_opt = acados_ocp_solver.solve_for_x0(x0[batch, :].cpu().numpy(), fail_on_nonzero_status=False)
+				# 	pdb.set_trace()
+				u0[batch, :] = torch.tensor(u_opt)
 			return u0
 
 		@staticmethod
