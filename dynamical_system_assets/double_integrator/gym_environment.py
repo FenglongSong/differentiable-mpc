@@ -81,7 +81,7 @@ class DoubleIntegratorEnv(gym.Env):
         force = np.clip(action, -self.max_force, self.max_force)[0]
         pos, vel = self.state[0], self.state[1]
 
-        cost = 100. * pos**2 + vel**2 + 0.01 * force**2
+        cost = 1.*pos**2 + 0.1*vel**2 + 0.001 * force**2
         reward = -cost
 
         pos += vel * self.dt

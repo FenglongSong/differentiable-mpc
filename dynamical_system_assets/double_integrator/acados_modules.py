@@ -8,8 +8,6 @@ N = 100
 Tf = dt * N
 Q_mat = np.diag([1e2, 1e1])
 Qf_mat = Q_mat
-target_state = np.array([0., 0.])
-target_input = np.array([0.])
 max_force = 1.
 min_force = -max_force
 
@@ -70,8 +68,8 @@ def create_acados_ocp() -> AcadosOcp:
     # set cost
     ocp.cost.cost_type = 'EXTERNAL'
     ocp.cost.cost_type_e = 'EXTERNAL'
-    ocp.model.cost_expr_ext_cost = 1 / 2 * (ocp.model.x - target_state).T @ Q_mat @ (ocp.model.x - target_state) \
-                                   + 1 / 2 * (ocp.model.u - target_input).T @ model.p @ (ocp.model.u - target_input)
+    ocp.model.cost_expr_ext_cost = 1 / 2 * ocp.model.x.T @ Q_mat @ ocp.model.x \
+                                   + 1 / 2 * ocp.model.u.T @ model.p @ ocp.model.u
     # ocp.model.cost_expr_ext_cost_e = 1 / 2 * (ocp.model.x - target_state).T @ Qf_mat @ (ocp.model.x - target_state)
     ocp.model.cost_expr_ext_cost_e = 0.
 

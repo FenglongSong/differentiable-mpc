@@ -2,6 +2,9 @@
 This gym environment is create to provide more flexibility to allow a self defined max torque.
 
 The origin Pendulum-v1 environment has a max torque of 2Nm, making it hard to solve for classic control methods at some initial conditions.
+Also, in reset() function the maximum possible initial value of |theta| is changed to 2/3*pi.
+
+dt is changed to 0.01 from 0.05
 """
 
 __credits__ = ["Carlos Luis"]
@@ -17,7 +20,7 @@ from gymnasium.envs.classic_control import utils
 from gymnasium.error import DependencyNotInstalled
 
 
-DEFAULT_X = np.pi
+DEFAULT_X = np.pi/2
 DEFAULT_Y = 1.0
 
 
@@ -103,10 +106,10 @@ class PendulumEnv(gym.Env):
         "render_fps": 30,
     }
 
-    def __init__(self, render_mode: Optional[str] = None, max_torque=20., g=10.0):
+    def __init__(self, render_mode: Optional[str] = None, max_torque=20., g=9.81):
         self.max_speed = 8
         self.max_torque = max_torque
-        self.dt = 0.05
+        self.dt = 0.01
         self.g = g
         self.m = 1.0
         self.l = 1.0

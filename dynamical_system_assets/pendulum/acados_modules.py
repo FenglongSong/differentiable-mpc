@@ -8,10 +8,7 @@ N = 100
 Tf = dt * N
 # Q_mat = np.diag([1e3, 1e2])
 R_mat = np.diag([1e-2])
-target_state = np.array([0., 0.])
-target_input = np.array([0.])
-max_torque = 20.
-min_torque = -20.
+max_torque = 30.
 
 def create_acados_model() -> AcadosModel:
     # set up states and inputs
@@ -77,7 +74,7 @@ def create_acados_ocp() -> AcadosOcp:
     ocp.model.cost_expr_ext_cost_e = 0.
 
     # set constraints
-    ocp.constraints.lbu = np.array([min_torque])
+    ocp.constraints.lbu = np.array([-max_torque])
     ocp.constraints.ubu = np.array([max_torque])
     ocp.constraints.idxbu = np.array(range(nu))
     ocp.constraints.x0 = np.zeros(nx)
@@ -171,7 +168,7 @@ def main():
     simX = np.zeros((N + 1, nx))
     simU = np.zeros((N, nu))
 
-    u0 = ocp_solver.solve_for_x0(np.array([np.pi, 1.]))
+    u0 = ocp_solver.solve_for_x0(np.array([np.pi/2, 8.]))
     ocp_solver.print_statistics()
     status = ocp_solver.get_status()
     if status != 0:
