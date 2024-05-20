@@ -56,7 +56,7 @@ class AcadosMpcSolver(BaseMpcSolver):
         self.horizon = acados_ocp_solver.acados_ocp.dims.N
 
     def solve(self, x0: np.ndarray) -> Tuple[np.ndarray, float, bool]:
-        opt_action = self.acados_ocp_solver.solve_for_x0(x0)
+        opt_action = self.acados_ocp_solver.solve_for_x0(x0, fail_on_nonzero_status=False)
         opt_cost = self.acados_ocp_solver.get_cost()
         status = self.acados_ocp_solver.get_status()
         if status in [0, 2]:
